@@ -1,0 +1,11 @@
+jboss_eap_version: "7.4.0"  # Specify the JBoss EAP version you want to install
+jboss_java_version: "8"     # Default JDK version (can be adjusted as needed)
+jboss_install_dir: "/opt/jboss"
+jboss_user: "jboss"
+jboss_group: "jboss"
+jboss_bind_addr: "0.0.0.0"
+jboss_http_port: 8080
+jboss_management_port: 9990
+jboss_admin_user: "admin"
+jboss_admin_password: "admin123!"
+jboss_download_url: "https://download.jboss.org/jbossas/{{ jboss_eap_version }}/jboss-eap-{{ jboss_eap_version }}.zip"

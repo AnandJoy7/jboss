@@ -1,0 +1,65 @@
+---
+- name: Install required packages
+  package:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - "{{ java_package }}"
+      - wget
+      - unzip
+      - tar
+  register: package_install
+  until: package_install is success
+  retries: 3
+  delay: 5
+
+- name: Create JBoss group
+  group:
+    name: "{{ jboss_group }}"
+    state: present
+
+- name: Create JBoss user
+  user:
+    name: "{{ jboss_user }}"
+    group: "{{ jboss_group }}"
+    shell: /sbin/nologin
+    home: "{{ jboss_install_dir }}"
+    createhome: no
+
+- name: Copy JBoss EAP zip from local files to remote server
+  copy:
+    src: "files/jboss-eap-{{ jboss_eap_version }}.zip"
+    dest: "/tmp/jboss-eap-{{ jboss_eap_version }}.zip"
+    mode: '0644'
+
+- name: Create JBoss install directory
+  file:
+    path: "{{ jboss_install_dir }}"
+    state: directory
+    owner: "{{ jboss_user }}"
+    group: "{{ jboss_group }}"
+    mode: '0750'
+
+- name: Extract JBoss EAP archive
+  unarchive:
+    src: "/tmp/jboss-eap-{{ jboss_eap_version }}.zip"
+    dest: "{{ jboss_install_dir }}"
+    remote_src: yes
+    owner: "{{ jboss_user }}"
+    group: "{{ jboss_group }}"
+    creates: "{{ jboss_install_dir }}/bin/standalone.sh"
+
+- name: Configure JBoss EAP service
+  template:
+    src: jboss.service.j2
+    dest: /etc/systemd/system/jboss.service
+    mode: '0644'
+  notify: restart jboss
+
+- name: Start and enable JBoss service
+  systemd:
+    name: jboss
+    state: started
+    enabled: yes
+    daemon_reload: yes

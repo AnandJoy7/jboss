@@ -1,0 +1,29 @@
+# jboss.service.j2 (Systemd Service Template)
+
+[Unit]
+Description=JBoss EAP Application Server
+Documentation=https://docs.jboss.org
+After=network.target
+
+[Service]
+Type=simple
+User={{ jboss_user }}
+Group={{ jboss_group }}
+Environment=JAVA_HOME=/usr/lib/jvm/java-{{ jboss_java_version }}-openjdk-amd64
+Environment=JBOSS_HOME={{ jboss_install_dir }}
+Environment=WILDFLY_HOME={{ jboss_install_dir }}
+Environment=LAUNCH_JBOSS_IN_BACKGROUND=1
+
+ExecStart={{ jboss_install_dir }}/bin/standalone.sh -b 0.0.0.0
+ExecStop={{ jboss_install_dir }}/bin/jboss-cli.sh --connect controller=0.0.0.0:9990 command=:shutdown
+
+StandardOutput=journal
+StandardError=journal
+
+Restart=on-failure
+RestartSec=60
+TimeoutStartSec=180
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target

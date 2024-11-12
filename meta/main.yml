@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: your_name
+  description: Role to install and configure JBoss EAP 7.x
+  company: your_company  # Optional, remove if not applicable
+  license: MIT
+  min_ansible_version: 2.9
+  dependencies: []
+
+  # Optional tags for role classification
+  galaxy_tags:
+    - jboss
+    - eap
+    - application-server
+    - jdk
+    - java

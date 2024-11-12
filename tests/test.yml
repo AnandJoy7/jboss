@@ -1,0 +1,44 @@
+---
+- name: Test JBoss EAP role
+  hosts: linux
+  become: true
+  vars:
+    jboss_eap_version: "7.4.0"
+    jboss_java_version: "8"
+    jboss_admin_password: "testpassword123"
+    jboss_bind_addr: "0.0.0.0"
+    jboss_http_port: 8080
+    jboss_management_port: 9990
+
+  pre_tasks:
+    - name: Display target host
+      debug:
+        msg: "Deploying to {{ inventory_hostname }} ({{ ansible_host }})"
+
+    - name: Update apt cache (Debian/Ubuntu)
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+      changed_when: false
+
+    - name: Update dnf cache (RedHat/CentOS/RHEL)
+      dnf:
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
+      changed_when: false
+
+  roles:
+    - role: "{{ playbook_dir }}/.."
+
+  post_tasks:
+    - name: Verify Java installation
+      command: java -version
+      register: java_version
+      changed_when: false
+
+    - name: Verify JBoss service is running
+      systemd:
+        name: jboss
+        state: started
+      register: jboss_service_status
